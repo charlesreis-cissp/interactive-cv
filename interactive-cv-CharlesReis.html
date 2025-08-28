@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive CV - Charles Reis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Taupe (using Tailwind's 'stone' and 'slate' colors with a muted teal accent) -->
+    <!-- Application Structure Plan: A single-page application with persistent left-hand navigation (Overview, Career Journey, Skills, Education). This thematic structure allows non-linear exploration, which is more engaging than a traditional linear CV. The core interaction is the 'Career Journey' timeline, where clicking a role dynamically displays its details. This transforms a static list into an interactive discovery process, better highlighting the depth of experience. -->
+    <!-- Visualization & Content Choices: 1. Career History -> Goal: Explore Change -> Method: Interactive vertical timeline (HTML/CSS/JS) -> Interaction: Click to show details in a separate panel. Justification: More engaging than scrolling a list. 2. Core Competencies -> Goal: Compare -> Method: Horizontal Bar Chart (Chart.js Canvas) -> Interaction: Hover for tooltips. Justification: Provides a quick, visual summary of strengths. 3. Tech Tools -> Goal: Inform -> Method: Styled tags/pills (HTML/Tailwind) -> Interaction: Simple hover effects. Justification: Easily scannable. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+            transform: translateX(4px);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            left: -2.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #a8a29e; /* stone-400 */
+            border: 3px solid #f5f5f4; /* stone-100 */
+        }
+        .timeline-item.active::before {
+            background-color: #0d9488; /* teal-600 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <main class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="md:flex">
+                <!-- Left Navigation Panel -->
+                <aside class="w-full md:w-1/4 lg:w-1/5 p-8 bg-stone-50 border-r border-stone-200">
+                    <div class="text-center md:text-left">
+                        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900">Charles Reis</h1>
+                        <p class="text-teal-700 font-medium mt-1">Audit & Risk Executive</p>
+                    </div>
+                    <nav class="mt-12 flex flex-row md:flex-col gap-2">
+                        <a href="#overview" id="nav-overview" class="nav-link active text-left w-full p-3 rounded-lg font-semibold text-slate-600 hover:bg-stone-200">Overview</a>
+                        <a href="#journey" id="nav-journey" class="nav-link text-left w-full p-3 rounded-lg font-semibold text-slate-600 hover:bg-stone-200">Career Journey</a>
+                        <a href="#skills" id="nav-skills" class="nav-link text-left w-full p-3 rounded-lg font-semibold text-slate-600 hover:bg-stone-200">Skills & Tools</a>
+                        <a href="#education" id="nav-education" class="nav-link text-left w-full p-3 rounded-lg font-semibold text-slate-600 hover:bg-stone-200">Education & Certs</a>
+                    </nav>
+                    <div class="mt-12 text-sm text-slate-500 hidden md:block">
+                        <h3 class="font-bold text-slate-600 mb-2">Contact</h3>
+                        <p>📧 drcharlie98@gmail.com</p>
+                        <p class="mt-1">🌍 Gold Coast, QLD</p>
+                        <a href="https://www.linkedin.com/in/reis-charles98/" target="_blank" class="mt-2 inline-block text-teal-600 hover:underline">LinkedIn Profile</a>
+                    </div>
+                </aside>
+
+                <!-- Right Content Panel -->
+                <div class="w-full md:w-3/4 lg:w-4/5 p-8 md:p-12">
+                    <!-- Overview Section -->
+                    <section id="overview-content" class="content-section">
+                        <h2 class="text-3xl font-bold text-slate-900 border-b-4 border-teal-500 pb-2">Professional Summary</h2>
+                        <p class="mt-6 text-lg leading-relaxed text-slate-700">
+                            Globally experienced and credentialed Audit & Risk Executive with over 25 years of leadership in Governance, Risk, and Compliance. I'm an expert in transforming audit functions, strengthening enterprise risk management, and embedding IT governance. I've led hands-on delivery of IT, operational, and cyber audits globally. Known for mentoring teams, integrating data-driven analytics, and actively supporting digital transformation initiatives by leveraging <strong>Python</strong> and <strong>JavaScript</strong> for data analysis and process automation.
+                        </p>
+                        <div class="mt-8 bg-teal-50 border-l-4 border-teal-500 p-6 rounded-r-lg">
+                            <h3 class="text-xl font-bold text-teal-900">Core Expertise</h3>
+                            <p class="mt-2 text-teal-800">
+                                My focus is on modernizing audit through technology, aligning risk management with strategic objectives, and building resilient, security-conscious organizational cultures.
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- Career Journey Section -->
+                    <section id="journey-content" class="content-section hidden">
+                        <h2 class="text-3xl font-bold text-slate-900 border-b-4 border-teal-500 pb-2">Career Journey</h2>
+                        <p class="mt-4 text-slate-600">An interactive timeline of my professional experience. Click on a role to see the key contributions and details.</p>
+                        <div class="mt-8 lg:flex lg:gap-8">
+                            <div class="lg:w-1/3 relative border-l-2 border-stone-200 ml-10 pl-8 py-4">
+                                <div id="timeline-container">
+                                    <!-- Timeline items will be injected here by JS -->
+                                </div>
+                            </div>
+                            <div class="lg:w-2/3 mt-8 lg:mt-0 bg-stone-50 p-6 rounded-xl">
+                                <div id="experience-details">
+                                    <!-- Details will be injected here by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Skills & Tools Section -->
+                    <section id="skills-content" class="content-section hidden">
+                        <h2 class="text-3xl font-bold text-slate-900 border-b-4 border-teal-500 pb-2">Skills & Tools</h2>
+                        <p class="mt-4 text-slate-600">A visualization of my core competencies and the technologies I use to drive results.</p>
+                        <div class="mt-8">
+                            <h3 class="text-xl font-bold text-slate-800 mb-4">Core Competencies</h3>
+                            <div class="chart-container">
+                                <canvas id="skillsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="mt-12">
+                            <h3 class="text-xl font-bold text-slate-800 mb-4">Technology & Tools</h3>
+                            <div id="tools-container" class="flex flex-wrap gap-3">
+                                <!-- Tools will be injected here by JS -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Education & Certifications Section -->
+                    <section id="education-content" class="content-section hidden">
+                        <h2 class="text-3xl font-bold text-slate-900 border-b-4 border-teal-500 pb-2">Education & Certifications</h2>
+                        <div class="mt-8 grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4">Education</h3>
+                                <div class="space-y-4">
+                                    <div class="bg-stone-50 p-4 rounded-lg">
+                                        <p class="font-semibold">Master of Business (IT Management)</p>
+                                        <p class="text-sm text-slate-600">University of Technology, Sydney</p>
+                                    </div>
+                                    <div class="bg-stone-50 p-4 rounded-lg">
+                                        <p class="font-semibold">Graduate Diploma in Accounting & Finance</p>
+                                        <p class="text-sm text-slate-600">UTS, Sydney</p>
+                                    </div>
+                                    <div class="bg-stone-50 p-4 rounded-lg">
+                                        <p class="font-semibold">Graduate Certificate – Business Systems Analysis</p>
+                                        <p class="text-sm text-slate-600">University of São Paulo, Brazil</p>
+                                    </div>
+                                    <div class="bg-stone-50 p-4 rounded-lg">
+                                        <p class="font-semibold">Bachelor of Commerce (Accounting)</p>
+                                        <p class="text-sm text-slate-600">University of São Paulo</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4">Certifications</h3>
+                                <div id="certs-container" class="flex flex-wrap gap-3">
+                                   <!-- Certs will be injected here by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- DATA ---
+            const experienceData = [
+                { id: 'advisor', title: 'Audit Advisor (Self-Employed)', company: 'Australia', duration: 'Jul 2013 – Present', contributions: [ 'Utilized Python scripts to analyze large datasets and identify control deficiencies, improving the efficiency of audits for major government and financial services clients.', 'Supported strategic audits on major government IT systems with high public accountability for the NSW Auditor General\'s Office.', 'Led audits focused on Basel compliance, IT general controls, and vendor risks for Macquarie Bank, Zurich Insurance, and Standard Chartered.', 'Conducted Sarbanes-Oxley audits and IT security reviews for global financial clients with BDO Hong Kong.' ] },
+                { id: 'cao_naghi', title: 'Chief Internal Audit Officer', company: 'Yousuf M.A. Naghi Group (KSA)', duration: 'Jan 2010 – Jul 2013', contributions: [ 'Rebuilt internal audit from the ground up for a multi-industry conglomerate.', 'Established a new audit model aligned with COSO ERM and IIA standards.', 'Recruited and led sector-specialized directors, embedding a group-wide risk culture.', 'Delivered fraud risk workshops and governance training across 5,000+ employees.' ] },
+                { id: 'pwc', title: 'Director, Risk & Control', company: 'PwC (Adelaide)', duration: 'Nov 2008 – May 2009', contributions: [ 'Led multi-sector audit projects and team capability uplift.', 'Trained 30+ audit professionals in customer care and audit analytics.', 'Secured repeat engagements via client satisfaction and clear reporting.' ] },
+                { id: 'cae_qatar', title: 'Chief Audit Executive', company: 'Qatar Steel / Qatar Petroleum', duration: 'Sep 2004 – Oct 2008', contributions: [ 'Created and ran the company’s internal audit from scratch.', 'Co-founded Qatar’s IIA Chapter and promoted the profession nationally.', 'Supported Balanced Scorecard implementation, aligning risk reporting with corporate KPIs.' ] },
+                { id: 'bdo', title: 'Senior Manager', company: 'BDO Australia & Asia Pacific', duration: 'Jul 2000 – Sep 2004', contributions: [ 'Led IS/IT audits and controls reviews across Australia, Pacific, and Asia.', 'Supported international collaborations on business continuity and disaster recovery reviews.' ] },
+                { id: 'early', title: 'Earlier Roles (Pre-2000)', company: 'Deloitte, Alcan, Arnott’s, Supre', duration: 'Pre-2000', contributions: [ 'Held progressive roles including Audit Senior/Assoc. Manager at Deloitte.', 'Served as Senior IT Auditor at Alcan Aluminium / Rio Tinto.', 'Established internal audit functions at Arnott’s (Australia & U.S.) and Supre.' ] },
+            ];
+
+            const toolsData = [ 'Python (Pandas, NumPy)', 'JavaScript (D3.js)', 'Power BI', 'Tableau', 'ACL / Galvanize / AuditBoard', 'Excel Power Query', 'RSA Archer', 'GRC Automation Tools' ];
+            const certsData = [ 'CIA', 'CISA', 'CISM', 'CISSP', 'CFE', 'CICA', 'CRA' ];
+
+            // --- RENDER FUNCTIONS ---
+            const timelineContainer = document.getElementById('timeline-container');
+            experienceData.forEach((job, index) => {
+                const item = document.createElement('div');
+                item.className = `timeline-item relative cursor-pointer p-2 rounded-md hover:bg-stone-200 ${index === 0 ? 'active' : ''}`;
+                item.dataset.id = job.id;
+                item.innerHTML = `<h4 class="font-bold">${job.title}</h4><p class="text-sm text-slate-500">${job.company}</p>`;
+                timelineContainer.appendChild(item);
+            });
+
+            const toolsContainer = document.getElementById('tools-container');
+            toolsData.forEach(tool => {
+                const item = document.createElement('div');
+                item.className = 'bg-stone-200 text-slate-800 text-sm font-semibold px-3 py-1 rounded-full';
+                item.textContent = tool;
+                toolsContainer.appendChild(item);
+            });
+            
+            const certsContainer = document.getElementById('certs-container');
+            certsData.forEach(cert => {
+                const item = document.createElement('div');
+                item.className = 'bg-teal-100 text-teal-800 text-sm font-bold px-4 py-2 rounded-lg';
+                item.textContent = cert;
+                certsContainer.appendChild(item);
+            });
+
+            // --- INTERACTIVITY ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const detailsContainer = document.getElementById('experience-details');
+
+            function showSection(targetId) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                contentSections.forEach(section => section.classList.add('hidden'));
+
+                document.querySelector(`a[href="#${targetId}"]`).classList.add('active');
+                document.getElementById(`${targetId}-content`).classList.remove('hidden');
+
+                if (targetId === 'skills' && !window.skillsChartInstance) {
+                    renderSkillsChart();
+                }
+            }
+            
+            function updateExperienceDetails(jobId) {
+                const job = experienceData.find(j => j.id === jobId);
+                if (!job) return;
+
+                detailsContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-slate-900">${job.title}</h3>
+                    <p class="font-semibold text-teal-700 mt-1">${job.company}</p>
+                    <p class="text-sm text-slate-500 mb-4">${job.duration}</p>
+                    <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                        ${job.contributions.map(c => `<li>${c}</li>`).join('')}
+                    </ul>
+                `;
+                
+                timelineItems.forEach(item => item.classList.remove('active'));
+                document.querySelector(`.timeline-item[data-id="${jobId}"]`).classList.add('active');
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.target.getAttribute('href').substring(1);
+                    showSection(targetId);
+                });
+            });
+
+            timelineItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const jobId = e.currentTarget.dataset.id;
+                    updateExperienceDetails(jobId);
+                });
+            });
+            
+            // --- CHART RENDERING ---
+            function renderSkillsChart() {
+                const ctx = document.getElementById('skillsChart').getContext('2d');
+                const skillsData = {
+                    labels: ['Risk-Based Internal Audit', 'Cybersecurity & IT Audit', 'GRC Frameworks & Tools', 'Data Analytics for Audit', 'Leadership & Mentoring', 'Technical Implementation'],
+                    datasets: [{
+                        label: 'Expertise Level',
+                        data: [95, 90, 90, 85, 98, 80],
+                        backgroundColor: 'rgba(13, 148, 136, 0.6)', // teal-600 with alpha
+                        borderColor: 'rgba(15, 118, 110, 1)', // teal-700
+                        borderWidth: 2,
+                        borderRadius: 4,
+                    }]
+                };
+
+                window.skillsChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: skillsData,
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` Expertise: ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: '#e7e5e4' // stone-200
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- INITIALIZATION ---
+            showSection('overview');
+            updateExperienceDetails(experienceData[0].id);
+        });
+    </script>
+</body>
+</html>
